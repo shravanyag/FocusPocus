@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import "../App.css";
 import Axios from "axios";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
@@ -16,14 +17,17 @@ const ResetPassword = () => {
     })
       .then((response) => {
         if (response.data.status) {
+          toast.success("Password updated!");
           navigate("/login");
+        } else if (response.data.message === "invalid token") {
+          toast.error("Invalid token!", { autoClose: 15000 });
         }
-        console.log(response.data);
       })
       .catch((err) => {
-        console.log(err);
+        toast.error("An error occurred!", { autoClose: 15000 });
       });
   };
+
   return (
     <div className="sign-up-container">
       <form className="sign-up-form" onSubmit={handleSubmit}>
