@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import "../App.css";
 import Axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Signup = () => {
   const [username, setUsername] = useState("");
@@ -19,13 +20,17 @@ const Signup = () => {
     })
       .then((response) => {
         if (response.data.status) {
+          toast.success("Record registered!");
           navigate("/login");
+        } else {
+          toast.error("User already exists!", { autoClose: 15000 });
         }
       })
       .catch((err) => {
-        console.log(err);
+        toast.error("An error occurred!", { autoClose: 15000 });
       });
   };
+
   return (
     <div className="sign-up-container">
       <form className="sign-up-form" onSubmit={handleSubmit}>

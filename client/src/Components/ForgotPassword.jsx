@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import "../App.css";
 import Axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -15,15 +16,19 @@ const ForgotPassword = () => {
     })
       .then((response) => {
         if (response.data.status) {
-          alert("Check your email for reset password link");
+          toast.success("Email sent!");
           navigate("/login");
+        } else if (response.data.message === "user is not registered") {
+          toast.error("User is not registered!", { autoClose: 15000 });
+        } else {
+          toast.error("Error in sending email!", { autoClose: 15000 });
         }
-        console.log(response.data);
       })
       .catch((err) => {
-        console.log(err);
+        toast.error("An error occurred!", { autoClose: 15000 });
       });
   };
+
   return (
     <div className="sign-up-container">
       <form className="sign-up-form" onSubmit={handleSubmit}>
