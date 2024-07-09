@@ -1,6 +1,7 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
 import {User} from '../models/User.js'
+import {Room} from '../models/Room.js'
 import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
 
@@ -110,7 +111,7 @@ const verifyUser = (req, res, next) => {
 }
 
 router.get('/verify', verifyUser, async (req, res) => {
-    const user = await User.findOne({username: req.user.username}).select('username email');
+    const user = await User.findOne({username: req.user.username}).select('username email').populate('rooms');;
     if(user){
         return res.json({status: true, message: "authorised", user})
     } else{
@@ -122,5 +123,45 @@ router.get('/logout', async (req, res) => {
     res.clearCookie('token')
     return res.json({status: true})
 })
+
+router.post('/create-room', verifyUser, async (req, res) => {
+    const { name } = req.body;
+    if (!name) {
+        return res.status(400).json({ status: false, message: "Room name is required" });
+    }
+    try {
+        const room = new Room({
+          name: req.body.name,
+          createdBy: req.body.user,
+        });
+        await room.save();
+        await User.findByIdAndUpdate(req.user._id, { $push: { rooms: room._id } });
+        return res.json({ status: true, message: "Room created", room: room });
+    } catch(err) {
+        //console.log(req.body.name)
+        //console.log(req.body.user)
+        return res.status(500).json({ status: false, message: err.message });
+    }
+});
+
+router.get('/rooms', verifyUser, async (req, res) => {
+    const user = await User.findById(req.user._id).populate('rooms');
+    return res.json({ status: true, rooms: user.rooms });
+});
+
+router.get('/room/:id', verifyUser, async (req, res) => {
+    const { id } = req.params;
+    try {
+      const room = await Room.findById(id).populate('createdBy', 'username');
+      if (room) {
+        return res.json({ status: true, room });
+      } else {
+        return res.json({ status: false, message: "Room not found" });
+      }
+    } catch (err) {
+      return res.json({ status: false, message: "Error fetching room" });
+    }
+  });
+  
 
 export {router as UserRouter}

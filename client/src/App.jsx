@@ -4,6 +4,7 @@ import Signup from "./Components/Signup";
 import Dashboard from "./Components/Dashboard";
 import ForgotPassword from "./Components/ForgotPassword";
 import ResetPassword from "./Components/ResetPassword";
+import Room from "./Components/Room";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -16,8 +17,9 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/forgotPassword" element={<ForgotPassword />} />
         <Route path="/resetPassword/:token" element={<ResetPassword />} />
+        <Route path="/room/:id" element={<Room />} />
       </Routes>
-      <ToastContainer 
+      <ToastContainer
         position="top-right"
         autoClose={5000}
         hideProgressBar={false}
