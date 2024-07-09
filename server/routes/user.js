@@ -101,6 +101,7 @@ const verifyUser = (req, res, next) => {
             return res.json({status: false, message: "no token"})
         }
         const decoded = jwt.verify(token, process.env.KEY);
+        req.user = decoded;
         next()
 
     } catch(err){
@@ -109,7 +110,12 @@ const verifyUser = (req, res, next) => {
 }
 
 router.get('/verify', verifyUser, async (req, res) => {
-    return res.json({status: true, message: "authorised"})
+    const user = await User.findOne({username: req.user.username}).select('username email');
+    if(user){
+        return res.json({status: true, message: "authorised", user})
+    } else{
+        return res.json({status: false, message: "user not found"});
+    }
 });
 
 router.get('/logout', async (req, res) => {
