@@ -31,7 +31,7 @@ npm start - inside server
 
 first run server then client
 
--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+---
 
 Git Commands to be used:
 
@@ -44,22 +44,40 @@ Git Commands to be used:
 3. Before starting to contribute, ensure that you are up-to-date with the repo by issuing a pull request while you are in your 'main' branch
    git pull origin main
 
-3. Any contributions that are made, should be made by creating a branch and not directly to the master. To create a branch:
+4. Any contributions that are made, should be made by creating a branch and not directly to the master. To create a branch:
    git branch <branch-name>
 
    Keep the branch name associated with what contribution you want to make through it.
 
-4. Then, traverse to the particular branch
+5. Then, traverse to the particular branch
    git checkout <branch-name>
 
-5. Now, you can make the required changes
+6. Now, you can make the required changes
 
-6. Then, commit the changes you have performed after ensuring that the code works properly:
+7. Then, commit the changes you have performed after ensuring that the code works properly:
    git commit -m "description message for the commit"
 
-7. Now, the local branch you had created has been updated remotely. Ensuring that there are no inconsistencies, you can merge the two local branches: main and <branch-name>:
+8. Now, the local branch you had created has been updated remotely. Ensuring that there are no inconsistencies, you can merge the two local branches: main and <branch-name>:
    git checkout main
    git merge <branch-name>
 
-8. Finally, push the changes that are now reflected in your local main to the master repo:
+9. Finally, push the changes that are now reflected in your local main to the master repo:
    git push origin main
+
+--commands
+
+git init
+git clone <repository-url>
+cd <repository-name>
+git pull origin main
+git branch branch-name
+git checkout branch-name
+
+Make your changes here
+
+git add .
+git commit -m "Description message for the commit"
+git push origin room
+git checkout main
+git merge room
+git push origin main
