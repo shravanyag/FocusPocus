@@ -1,6 +1,7 @@
-import axios from "axios";
+
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const Dashboard = () => {
@@ -8,7 +9,10 @@ const Dashboard = () => {
   const [roomName, setRoomName] = useState("");
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
+
   axios.defaults.withCredentials = true;
+
+  // Logout function
   const handleLogout = () => {
     axios
       .get("http://localhost:3000/auth/logout")
@@ -18,15 +22,20 @@ const Dashboard = () => {
             position: "top-right",
             autoClose: 5000,
           });
+          setUser({ username: "", email: "", rooms: [] }); // Clear user state
           navigate("/login");
+        } else {
+          toast.error("Failed to logout");
         }
       })
       .catch((err) => {
-        console.log(err);
+        console.error("Error logging out:", err);
+        toast.error("Failed to logout");
       });
   };
+
+  // Create room function
   const createRoom = () => {
-    console.log(user);
     if (!roomName) {
       toast.error("Room name is required", {
         position: "top-right",
@@ -34,6 +43,7 @@ const Dashboard = () => {
       });
       return;
     }
+
     axios
       .post("http://localhost:3000/auth/create-room", {
         name: roomName,
@@ -48,49 +58,78 @@ const Dashboard = () => {
           setRoomName("");
           setShowModal(false);
           toast.success("Room created successfully!");
-          console.log(res.data.status);
         } else {
-          toast.error("Failed to create room.");
-          console.log("sowwwyyyy");
+          if (res.data.message === "Room name already exists") {
+            toast.error("Room name already exists. Please use a different name.", {
+              position: "top-right",
+              autoClose: 5000,
+            });
+          } else {
+            toast.error("Failed to create room. Please try again later.", {
+              position: "top-right",
+              autoClose: 5000,
+            });
+          }
         }
+      })
+      .catch((err) => {
+        console.error("Error creating room:", err);
+        toast.error("Failed to create room. Please try again later.", {
+          position: "top-right",
+          autoClose: 5000,
+        });
       });
   };
 
+  // Fetch user data on component mount
   useEffect(() => {
-    axios.get("http://localhost:3000/auth/verify").then((res) => {
-      if (res.data.status) {
-        setUser(res.data.user);
-        console.log(res.data.user);
-      } else {
-        toast.error("Unauthorized access", {
+    const fetchUserData = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/auth/verify");
+        if (response.data.status) {
+          setUser(response.data.user); // Update user state with fetched data
+        } else {
+          toast.error("Unauthorized access", {
+            position: "top-right",
+            autoClose: 5000,
+          });
+          navigate("/login");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        toast.error("Error fetching user data", {
           position: "top-right",
-          autoClose: 15000,
+          autoClose: 5000,
         });
         navigate("/login");
       }
-    });
+    };
+
+    fetchUserData();
   }, [navigate]);
+
   return (
     <div>
-      Dashboard
-      <button onClick={handleLogout}>Logout</button>
+      <h1>Welcome, {user.username}</h1>
+      <p>Email: {user.email}</p>
+
       <div>
-        <p>Hi {user.username}</p>
-        <p>Email: {user.email}</p>
-        <div>
-          <h2>Rooms</h2>
-          <ul>
-            {user.rooms.map((room) => (
-              <li key={room._id}>
+        <h2>Rooms</h2>
+        <ul>
+          {user.rooms.map((room) => (
+            <li key={room._id}>
+              <Link to={`/yourRoom/${room._id}`}>
                 <p>Room Name: {room.name}</p>
-                <p>Created By: {room.createdBy}</p>
-                <p>Created At: {new Date(room.createdAt).toLocaleString()}</p>
-              </li>
-            ))}
-          </ul>
-        </div>
+              </Link>
+              <p>Created By: {room.createdBy}</p>
+              <p>Created At: {new Date(room.createdAt).toLocaleString()}</p>
+            </li>
+          ))}
+        </ul>
       </div>
+
       <button onClick={() => setShowModal(true)}>Create Room</button>
+
       {showModal && (
         <div className="modal">
           <div className="modal-content">
@@ -106,6 +145,8 @@ const Dashboard = () => {
           </div>
         </div>
       )}
+
+      <button onClick={handleLogout}>Logout</button>
     </div>
   );
 };

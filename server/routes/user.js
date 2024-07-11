@@ -1,3 +1,4 @@
+
 import express from 'express'
 import bcrypt from 'bcrypt'
 import {User} from '../models/User.js'
@@ -124,25 +125,38 @@ router.get('/logout', async (req, res) => {
     return res.json({status: true})
 })
 
-router.post('/create-room', verifyUser, async (req, res) => {
-    const { name } = req.body;
+router.post('/create-room', async (req, res) => {
+    const { name, user } = req.body;
+  
     if (!name) {
-        return res.status(400).json({ status: false, message: "Room name is required" });
+      return res.status(400).json({ status: false, message: "Room name is required" });
     }
+  
     try {
-        const room = new Room({
-          name: req.body.name,
-          createdBy: req.body.user,
-        });
-        await room.save();
-        await User.findByIdAndUpdate(req.user._id, { $push: { rooms: room._id } });
-        return res.json({ status: true, message: "Room created", room: room });
-    } catch(err) {
-        //console.log(req.body.name)
-        //console.log(req.body.user)
-        return res.status(500).json({ status: false, message: err.message });
+      // Check if room with the same name already exists
+      const existingRoom = await Room.findOne({ name });
+      if (existingRoom) {
+        return res.status(400).json({ status: false, message: "Room name already exists" });
+        
+      }
+      console.log(existingRoom)
+      // Create new room
+      const room = new Room({
+        name,
+        createdBy: user,
+      });
+      await room.save();
+  
+      // Update user's rooms array
+      await User.findByIdAndUpdate(user, { $push: { rooms: room._id } });
+  
+      return res.json({ status: true, message: "Room created successfully", room });
+    } catch (error) {
+      console.error("Error creating room:", error);
+      return res.status(500).json({ status: false, message: "Failed to create room" });
     }
-});
+  });
+  
 
 router.get('/rooms', verifyUser, async (req, res) => {
     const user = await User.findById(req.user._id).populate('rooms');
@@ -162,6 +176,24 @@ router.get('/room/:id', verifyUser, async (req, res) => {
       return res.json({ status: false, message: "Error fetching room" });
     }
   });
+
+  router.get('/yourRoom/:id', verifyUser, async (req, res) => {
+    const { id } = req.params;
+    try {
+      const room = await Room.findById(id).populate('createdBy', 'username');
+      if (room) {
+        return res.json({ status: true, room });
+      } else {
+        return res.json({ status: false, message: "Room not found" });
+      }
+    } catch (err) {
+      return res.status(500).json({ status: false, message: "Error fetching room" });
+    }
+  });
   
 
 export {router as UserRouter}
+
+
+
+
