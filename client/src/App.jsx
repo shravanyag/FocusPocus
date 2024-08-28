@@ -4,6 +4,7 @@ import Signup from "./Components/Signup";
 import Dashboard from "./Components/Dashboard";
 import ForgotPassword from "./Components/ForgotPassword";
 import ResetPassword from "./Components/ResetPassword";
+import YourRoom from "./Components/YourRoom";
 import Room from "./Components/Room";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -18,6 +19,7 @@ function App() {
         <Route path="/forgotPassword" element={<ForgotPassword />} />
         <Route path="/resetPassword/:token" element={<ResetPassword />} />
         <Route path="/room/:id" element={<Room />} />
+        <Route path="/yourRoom/:token" element={<YourRoom />} />
       </Routes>
       <ToastContainer
         position="top-right"

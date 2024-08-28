@@ -3,6 +3,7 @@ import express from 'express'
 import bcrypt from 'bcrypt'
 import {User} from '../models/User.js'
 import {Room} from '../models/Room.js'
+//import {Chat} from '../models/Chat.js'
 import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
 
@@ -112,7 +113,7 @@ const verifyUser = (req, res, next) => {
 }
 
 router.get('/verify', verifyUser, async (req, res) => {
-    const user = await User.findOne({username: req.user.username}).select('username email').populate('rooms');;
+    const user = await User.findOne({username: req.user.username}).select('username email').populate('rooms');
     if(user){
         return res.json({status: true, message: "authorised", user})
     } else{
@@ -163,34 +164,20 @@ router.get('/rooms', verifyUser, async (req, res) => {
     return res.json({ status: true, rooms: user.rooms });
 });
 
-router.get('/room/:id', verifyUser, async (req, res) => {
-    const { id } = req.params;
+router.get('/yourRoom/:token', verifyUser, async (req, res) => {
+    const { token } = req.params;
+    
     try {
-      const room = await Room.findById(id).populate('createdBy', 'username');
-      if (room) {
-        return res.json({ status: true, room });
-      } else {
-        return res.json({ status: false, message: "Room not found" });
+      const room = await Room.findById(token).populate('createdBy', 'username');
+      if (!room) {
+        return res.status(404).json({ status: false, message: "Room not found" });
       }
-    } catch (err) {
-      return res.json({ status: false, message: "Error fetching room" });
-    }
-  });
-
-  router.get('/yourRoom/:id', verifyUser, async (req, res) => {
-    const { id } = req.params;
-    try {
-      const room = await Room.findById(id).populate('createdBy', 'username');
-      if (room) {
-        return res.json({ status: true, room });
-      } else {
-        return res.json({ status: false, message: "Room not found" });
-      }
-    } catch (err) {
+      return res.json({ status: true, room });
+    } catch (error) {
+      console.error("Error fetching room:", error);
       return res.status(500).json({ status: false, message: "Error fetching room" });
     }
   });
-  
 
 export {router as UserRouter}
 

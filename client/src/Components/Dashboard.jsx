@@ -1,13 +1,14 @@
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
+//import JoinRoomModal from "./JoinRoomModal";
 
 const Dashboard = () => {
   const [user, setUser] = useState({ username: "", email: "", rooms: [] });
   const [roomName, setRoomName] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [showJoinRoomModal, setShowJoinRoomModal] = useState(false);
   const navigate = useNavigate();
 
   axios.defaults.withCredentials = true;
@@ -60,10 +61,13 @@ const Dashboard = () => {
           toast.success("Room created successfully!");
         } else {
           if (res.data.message === "Room name already exists") {
-            toast.error("Room name already exists. Please use a different name.", {
-              position: "top-right",
-              autoClose: 5000,
-            });
+            toast.error(
+              "Room name already exists. Please use a different name.",
+              {
+                position: "top-right",
+                autoClose: 5000,
+              }
+            );
           } else {
             toast.error("Failed to create room. Please try again later.", {
               position: "top-right",
@@ -88,6 +92,7 @@ const Dashboard = () => {
         const response = await axios.get("http://localhost:3000/auth/verify");
         if (response.data.status) {
           setUser(response.data.user); // Update user state with fetched data
+          console.log(response.data);
         } else {
           toast.error("Unauthorized access", {
             position: "top-right",
