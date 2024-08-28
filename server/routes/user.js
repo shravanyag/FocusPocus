@@ -179,6 +179,36 @@ router.get('/yourRoom/:token', verifyUser, async (req, res) => {
     }
   });
 
+  router.post('/join-room', async (req, res) => {
+    const { name, password } = req.body;
+    console.log(req.body);
+    try {
+      const room = await Room.findOne({ name });
+      //console.log("room=");
+      //console.log(room);
+      if (!room) {
+        return res.json({ status: false, message: "Room not found" });
+      }
+  
+      // Direct comparison of password and room.password
+      //console.log("password = ");
+      //console.log(password);
+      //console.log("room.password = ");
+      //console.log(room._id.toString());
+      if (password !== room._id.toString()) {
+        console.log("incorrect pwd");
+        return res.json({ status: false, message: "Incorrect password" });
+        
+      }
+  
+      return res.json({ status: true, message: "Room joined successfully", room });
+    } catch (error) {
+      console.error("Error joining room:", error);
+      console.log("other error");
+      return res.status(500).json({ status: false, message: "Failed to join room" });
+    }
+  });
+
 export {router as UserRouter}
 
 
