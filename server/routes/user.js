@@ -3,6 +3,7 @@ import express from 'express'
 import bcrypt from 'bcrypt'
 import {User} from '../models/User.js'
 import {Room} from '../models/Room.js'
+import {ChatMessage} from '../models/ChatMessage.js'
 //import {Chat} from '../models/Chat.js'
 import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
@@ -208,6 +209,40 @@ router.get('/yourRoom/:token', verifyUser, async (req, res) => {
       return res.status(500).json({ status: false, message: "Failed to join room" });
     }
   });
+
+  router.get("/messages", async (req, res) => {
+    try {
+        const messages = await ChatMessage.find();
+        res.json(messages);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.post("/messages", async (req, res) => {
+    try {
+        const { user, message } = req.body;
+
+        if (!user || !message) {
+            return res
+                .status(400)
+                .json({ error: "User and message are required" });
+        }
+
+        const chatMessage = new ChatMessage({
+            user,
+            message,
+        });
+
+        await chatMessage.save();
+
+        res.status(201).json(chatMessage);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
 
 export {router as UserRouter}
 

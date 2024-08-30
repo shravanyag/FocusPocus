@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
+import ChatRoom from "./ChatRoom";
 
 const YourRoom = () => {
   const { token } = useParams();
@@ -36,6 +37,7 @@ const YourRoom = () => {
       <h1>{room.name}</h1>
       <p>Created by: {room.createdBy.username}</p>
       <p>Created at: {new Date(room.createdAt).toLocaleString()}</p>
+      <ChatRoom />
     </div>
   );
 };
